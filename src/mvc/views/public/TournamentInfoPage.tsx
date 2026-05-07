@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { getTournamentInfoView } from '../../controllers/tournaments/publicTournamentController'
+import type { MatchRecord } from '../../models/tournament/Tournament'
 
 type SortKey = 'runs' | 'wickets' | 'averageRun' | 'economyRate'
 
@@ -131,6 +132,7 @@ export default function TournamentInfoPage() {
                   <th className="num">P</th>
                   <th className="num">W</th>
                   <th className="num">L</th>
+                  <th className="num">T</th>
                   <th className="num">Pts</th>
                 </tr>
               </thead>
@@ -142,6 +144,7 @@ export default function TournamentInfoPage() {
                     <td className="num">{row.played}</td>
                     <td className="num">{row.won}</td>
                     <td className="num">{row.lost}</td>
+                    <td className="num">{row.tied}</td>
                     <td className="num"><b>{row.points}</b></td>
                   </tr>
                 ))}
@@ -201,6 +204,71 @@ export default function TournamentInfoPage() {
           </div>
         )}
       </section>
+
+      <MatchesSection tournamentId={view.tournament.id} />
     </div>
+  )
+}
+
+function stageLabel(stage: MatchRecord['stage']): string {
+  if (stage === 'GROUP') return 'Group Stage'
+  if (stage === 'QUARTER_FINAL') return 'Quarter Final'
+  if (stage === 'SEMI_FINAL') return 'Semi Final'
+  return 'Final'
+}
+
+function MatchesSection({ tournamentId }: { tournamentId: string }) {
+  const [view, setView] = useState<Awaited<ReturnType<typeof getTournamentInfoView>>>(null)
+  useEffect(() => {
+    let active = true
+    ;(async () => {
+      const v = await getTournamentInfoView(tournamentId)
+      if (active) setView(v)
+    })()
+    return () => {
+      active = false
+    }
+  }, [tournamentId])
+
+  if (!view) return null
+  const matches = (view.tournament.matches ?? [])
+    .slice()
+    .sort((a: MatchRecord, b: MatchRecord) => a.sequence - b.sequence)
+  if (matches.length === 0) return null
+
+  return (
+    <section className="admin-grid">
+      <div className="section-head">
+        <h2 className="section-title">Matches</h2>
+      </div>
+      <div className="match-grid">
+        {matches.map((m: MatchRecord) => (
+          <Link
+            key={m.id}
+            to={`/tournaments/${view.tournament.id}/matches/${m.id}`}
+            className="match-card"
+          >
+            <div className="match-card-top">
+              <span>{stageLabel(m.stage)}</span>
+              <span className="status-badge {m.status === 'COMPLETED' ? 'completed' : 'upcoming'}">
+                {m.status === 'COMPLETED'
+                  ? 'Completed'
+                  : m.status === 'IN_PROGRESS'
+                  ? 'Live'
+                  : 'Scheduled'}
+              </span>
+            </div>
+            <p className="match-card-team">{m.home.label}</p>
+            <p className="match-card-vs">vs</p>
+            <p className="match-card-team">{m.away.label}</p>
+            {m.result ? (
+              <p className="admin-soft" style={{ marginTop: 8 }}>
+                {m.result.winnerLabel}
+              </p>
+            ) : null}
+          </Link>
+        ))}
+      </div>
+    </section>
   )
 }

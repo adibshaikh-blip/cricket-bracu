@@ -24,6 +24,15 @@ export function validateTournamentCreateInput(input: TournamentCreateInput): str
   const validType: TournamentTypeCode[] = [1, 2]
   if (!validType.includes(input.tournamentType)) return 'Invalid tournament type.'
 
+  if (
+    !Number.isFinite(input.oversPerMatch) ||
+    input.oversPerMatch < 1 ||
+    input.oversPerMatch > 50 ||
+    !Number.isInteger(input.oversPerMatch)
+  ) {
+    return 'Overs per match must be a whole number between 1 and 50.'
+  }
+
   return null
 }
 

@@ -3,7 +3,6 @@ import { db } from './firebase'
 import type {
   GroupRecord,
   MatchRecord,
-  TeamRecord,
   TournamentCreateInput,
   TournamentRecord,
   TournamentStatus,
@@ -39,10 +38,6 @@ function tournamentRef(tournamentId: string) {
   return ref(db, `/tournaments/${tournamentId}`)
 }
 
-function teamsRef(tournamentId: string) {
-  return ref(db, `/tournaments/${tournamentId}/teams`)
-}
-
 export async function getTournamentByIdFromDb(
   tournamentId: string,
 ): Promise<TournamentRecord | null> {
@@ -55,24 +50,6 @@ export async function getAllTournamentsFromDb(): Promise<TournamentRecord[]> {
   const value = snapshot.val() as Record<string, TournamentRecord> | null
   if (!value) return []
   return Object.values(value)
-}
-
-export async function addTeamToTournamentInDb(params: {
-  tournamentId: string
-  teamName: string
-}): Promise<TeamRecord> {
-  const newTeamRef = push(teamsRef(params.tournamentId))
-  const id = newTeamRef.key
-  if (!id) throw new Error('Failed to create team id')
-
-  const team: TeamRecord = {
-    id,
-    teamName: params.teamName.trim(),
-    addedAt: Date.now(),
-  }
-
-  await set(newTeamRef, team)
-  return team
 }
 
 export async function removeTeamFromTournamentInDb(params: {
@@ -92,6 +69,24 @@ export async function setTournamentStartedDataInDb(params: {
     startedAt: Date.now(),
     groups: params.groups,
     matches: params.matches,
+  })
+}
+
+export async function setTournamentMatchesInDb(params: {
+  tournamentId: string
+  matches: MatchRecord[]
+}): Promise<void> {
+  await update(tournamentRef(params.tournamentId), {
+    matches: params.matches,
+  })
+}
+
+export async function setTournamentStatusInDb(params: {
+  tournamentId: string
+  status: 'ONGOING' | 'COMPLETED'
+}): Promise<void> {
+  await update(tournamentRef(params.tournamentId), {
+    status: params.status,
   })
 }
 

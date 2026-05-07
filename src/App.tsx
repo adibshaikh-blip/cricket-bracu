@@ -8,7 +8,8 @@ import PlayerRegisterPage from './mvc/views/auth/PlayerRegisterPage'
 import AdminDashboardPage from './mvc/views/admin/AdminDashboardPage'
 import PlayerDashboardPage from './mvc/views/player/PlayerDashboardPage'
 import TournamentManagementPage from './mvc/views/admin/TournamentManagementPage'
-import MatchScoringPlaceholderPage from './mvc/views/admin/MatchScoringPlaceholderPage'
+import MatchScoringPage from './mvc/views/admin/MatchScoringPage'
+import MatchViewPage from './mvc/views/public/MatchViewPage'
 import TeamManagementPage from './mvc/views/player/TeamManagementPage'
 import PlayerProfilePage from './mvc/views/player/PlayerProfilePage'
 import TopBar from './mvc/views/common/TopBar'
@@ -76,9 +77,13 @@ export default function App() {
           path="/admin/tournaments/:tournamentId/matches/:matchId/score"
           element={
             <RequireRole requiredRole="admin">
-              <MatchScoringPlaceholderPage />
+              <MatchScoringPage />
             </RequireRole>
           }
+        />
+        <Route
+          path="/tournaments/:tournamentId/matches/:matchId"
+          element={<MatchViewPage />}
         />
         <Route
           path="/player/dashboard"

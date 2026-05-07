@@ -1922,6 +1922,363 @@
   }
 }
 
+/* =========================================================
+   Match scoring system (admin) + match view (public)
+   ========================================================= */
+
+/* live status badge (alias of .live with the pulse animation) */
+.status-badge.live-now {
+  color: #fff;
+  background: var(--live);
+  border-color: var(--live);
+}
+.status-badge.live-now::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35);
+  animation: livePulse 1.4s ease-in-out infinite;
+}
+
+/* ---------- toss ---------- */
+.toss-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.toss-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 28px 16px;
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface-soft);
+  cursor: pointer;
+  transition: border-color 160ms ease, transform 160ms ease, background 160ms ease;
+  font: inherit;
+}
+
+.toss-card:hover {
+  border-color: var(--brand);
+  background: var(--brand-bg);
+  transform: translateY(-2px);
+}
+
+.toss-card-name {
+  font-weight: 800;
+  font-size: 1.2rem;
+  color: var(--text-h);
+}
+
+.toss-card-meta {
+  color: var(--text-soft);
+  font-size: 0.85rem;
+}
+
+/* ---------- big scoreboard ---------- */
+.scoreboard-section {
+  position: sticky;
+  top: 64px;
+  z-index: 1;
+  background: linear-gradient(180deg, var(--brand-bg) 0%, var(--surface) 70%);
+  border-color: var(--brand-border);
+}
+
+.scoreboard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.scoreboard-team {
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+  font-size: 0.85rem;
+}
+
+.scoreboard-runs {
+  font-size: clamp(2.6rem, 6vw, 4rem);
+  font-weight: 900;
+  line-height: 1;
+  color: var(--brand);
+  letter-spacing: -0.02em;
+}
+
+.scoreboard-overs {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.scoreboard-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: center;
+  color: var(--text-soft);
+  font-size: 0.9rem;
+}
+
+.scoreboard-meta span b {
+  color: var(--text-h);
+}
+
+/* ---------- batsmen + bowler row ---------- */
+.bowler-batsmen-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.stat-table.compact {
+  font-size: 0.88rem;
+}
+
+.stat-table.compact thead th,
+.stat-table.compact tbody td {
+  padding: 6px 8px;
+}
+
+/* ---------- ball strip (this over / recent balls) ---------- */
+.ball-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.ball-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 8px;
+  border-radius: 50%;
+  background: var(--surface-muted);
+  color: var(--text-h);
+  font-weight: 800;
+  font-size: 0.85rem;
+  border: 1px solid var(--border);
+}
+
+.ball-chip.dot {
+  background: var(--surface);
+  color: var(--text-soft);
+}
+.ball-chip.run {
+  background: var(--surface);
+  color: var(--text-h);
+  border-color: var(--border-strong);
+}
+.ball-chip.four {
+  background: #fef3c7;
+  color: #b45309;
+  border-color: #fde68a;
+}
+.ball-chip.six {
+  background: var(--brand-bg);
+  color: var(--brand);
+  border-color: var(--brand-border);
+}
+.ball-chip.extra {
+  background: #ecfeff;
+  color: #0e7490;
+  border-color: #a5f3fc;
+  border-radius: 8px;
+}
+.ball-chip.bye {
+  background: #f5f3ff;
+  color: #6d28d9;
+  border-color: #ddd6fe;
+  border-radius: 8px;
+}
+.ball-chip.wicket {
+  background: var(--live);
+  color: #fff;
+  border-color: var(--live);
+}
+
+/* ---------- scoring buttons ---------- */
+.scoring-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.score-btn {
+  appearance: none;
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text-h);
+  font-weight: 800;
+  font-size: 1.4rem;
+  padding: 18px 8px;
+  cursor: pointer;
+  transition: transform 100ms ease, background 120ms ease, border-color 120ms ease;
+}
+
+.score-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: var(--brand);
+}
+
+.score-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.score-btn.four {
+  background: #fef3c7;
+  border-color: #fbbf24;
+  color: #b45309;
+}
+.score-btn.six {
+  background: var(--brand-bg);
+  border-color: var(--brand);
+  color: var(--brand);
+}
+.score-btn.extra {
+  font-size: 0.95rem;
+  background: #ecfeff;
+  border-color: #67e8f9;
+  color: #0e7490;
+  letter-spacing: 0.04em;
+}
+.score-btn.wicket {
+  background: var(--live);
+  border-color: var(--live);
+  color: #fff;
+}
+
+.score-btn.small {
+  padding: 10px 6px;
+  font-size: 1rem;
+  border-radius: 10px;
+}
+
+.score-btn.small.active {
+  border-color: var(--brand);
+  background: var(--brand-bg);
+  color: var(--brand);
+}
+
+.quick-runs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 8px 0;
+}
+
+/* ---------- final scoreboard ---------- */
+.final-scoreboard {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+/* ---------- scoring page wrapper ---------- */
+.scoring-page {
+  /* Push content under the sticky scoreboard. */
+}
+
+/* ---------- match view ---------- */
+.match-view {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.match-view-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+
+@media (min-width: 1100px) {
+  .match-view-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.innings-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.match-view-feed-note {
+  border-top: 1px dashed var(--border);
+  padding-top: 12px;
+  font-size: 0.85rem;
+}
+
+/* ---------- prediction ---------- */
+.prediction-card {
+  background: linear-gradient(180deg, var(--brand-bg) 0%, var(--surface) 70%);
+  border-color: var(--brand-border);
+}
+
+.prediction-bar {
+  display: flex;
+  height: 28px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  font-weight: 800;
+  color: #fff;
+}
+
+.prediction-bar-team {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  transition: flex 280ms ease;
+  min-width: 0;
+}
+
+.prediction-bar-team.team-a {
+  background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
+}
+
+.prediction-bar-team.team-b {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+}
+
+.prediction-legend {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.prediction-meta {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 0.9rem;
+  color: var(--text-soft);
+}
+
+.prediction-meta span b {
+  color: var(--text-h);
+}
+
 @media (max-width: 760px) {
   .admin-form-row,
   .admin-meta-row,
@@ -1960,5 +2317,19 @@
 
   .podium {
     grid-template-columns: 1fr;
+  }
+
+  .scoring-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .toss-grid,
+  .bowler-batsmen-row,
+  .final-scoreboard {
+    grid-template-columns: 1fr;
+  }
+
+  .scoreboard-section {
+    position: static;
   }
 }

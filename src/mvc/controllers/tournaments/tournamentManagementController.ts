@@ -1,5 +1,4 @@
 import {
-  addTeamToTournamentInDb,
   getTournamentByIdFromDb,
   removeTeamFromTournamentInDb,
   setTournamentStartedDataInDb,
@@ -32,24 +31,6 @@ export async function getTournamentForManagement(
     groups: normalizeCollection<GroupRecord>(t.groups),
     matches: normalizeCollection<MatchRecord>(t.matches),
   }
-}
-
-export async function addTeamToTournament(params: {
-  tournamentId: string
-  teamName: string
-}): Promise<TeamRecord> {
-  if (!params.teamName.trim()) throw new Error('Team name is required.')
-
-  const t = await getTournamentForManagement(params.tournamentId)
-  if (!t) throw new Error('Tournament not found.')
-  if (t.status !== 'UPCOMING') {
-    throw new Error('Cannot add teams after tournament starts.')
-  }
-  if ((t.teams?.length ?? 0) >= t.maxTeams) {
-    throw new Error('Maximum number of teams reached.')
-  }
-
-  return addTeamToTournamentInDb(params)
 }
 
 export async function kickTeamFromTournament(params: {

@@ -17,6 +17,7 @@ export default function TournamentCreateForm({
   const [numberOfGroups, setNumberOfGroups] = useState<number>(2)
   const [maxTeams, setMaxTeams] = useState<number>(8)
   const [tournamentType, setTournamentType] = useState<TournamentCreateInput['tournamentType']>(1)
+  const [oversPerMatch, setOversPerMatch] = useState<number>(20)
 
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -41,6 +42,7 @@ export default function TournamentCreateForm({
         numberOfGroups,
         maxTeams,
         tournamentType,
+        oversPerMatch,
       }
 
       const tournamentId = await createTournament({
@@ -119,24 +121,44 @@ export default function TournamentCreateForm({
           </label>
         </div>
 
-        <label className="admin-label">
-          Tournament Type
-          <select
-            className="admin-select"
-            value={tournamentType}
-            onChange={(e) => setTournamentType(Number(e.target.value) as TournamentCreateInput['tournamentType'])}
-          >
-            <option value={TournamentType.GROUP_QUARTER_SEMI_FINAL_FINAL}>
-              {tournamentTypeLabel(TournamentType.GROUP_QUARTER_SEMI_FINAL_FINAL)}
-            </option>
-            <option value={TournamentType.GROUP_SEMI_FINAL_FINAL}>
-              {tournamentTypeLabel(TournamentType.GROUP_SEMI_FINAL_FINAL)}
-            </option>
-          </select>
-          <p className="admin-muted">
-            Selected: <b>{currentTypeLabel}</b>
-          </p>
-        </label>
+        <div className="admin-form-row">
+          <label className="admin-label">
+            Tournament Type
+            <select
+              className="admin-select"
+              value={tournamentType}
+              onChange={(e) => setTournamentType(Number(e.target.value) as TournamentCreateInput['tournamentType'])}
+            >
+              <option value={TournamentType.GROUP_QUARTER_SEMI_FINAL_FINAL}>
+                {tournamentTypeLabel(TournamentType.GROUP_QUARTER_SEMI_FINAL_FINAL)}
+              </option>
+              <option value={TournamentType.GROUP_SEMI_FINAL_FINAL}>
+                {tournamentTypeLabel(TournamentType.GROUP_SEMI_FINAL_FINAL)}
+              </option>
+            </select>
+            <p className="admin-muted">
+              Selected: <b>{currentTypeLabel}</b>
+            </p>
+          </label>
+
+          <label className="admin-label">
+            Overs per match
+            <input
+              className="admin-input"
+              required
+              type="number"
+              min={1}
+              max={50}
+              step={1}
+              value={oversPerMatch}
+              onChange={(e) => setOversPerMatch(Number(e.target.value))}
+            />
+            <p className="admin-muted">
+              Each innings will be played for {oversPerMatch} over
+              {oversPerMatch === 1 ? '' : 's'}.
+            </p>
+          </label>
+        </div>
       </div>
 
       <button

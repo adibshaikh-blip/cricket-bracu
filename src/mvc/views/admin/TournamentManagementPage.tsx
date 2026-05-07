@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
-  addTeamToTournament,
   getTournamentForManagement,
   kickTeamFromTournament,
   startTournament,
@@ -20,7 +19,6 @@ export default function TournamentManagementPage() {
   const [tournament, setTournament] = useState<TournamentRecord | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [teamName, setTeamName] = useState('')
   const [busy, setBusy] = useState(false)
 
   const reload = async (withSpinner = false) => {
@@ -66,22 +64,6 @@ export default function TournamentManagementPage() {
   const groups = useMemo(() => tournament?.groups ?? [], [tournament?.groups])
 
   const canManageTeams = tournament?.status === 'UPCOMING'
-
-  const onAddTeam = async (e: FormEvent) => {
-    e.preventDefault()
-    if (!tournamentId) return
-    setBusy(true)
-    setError(null)
-    try {
-      await addTeamToTournament({ tournamentId, teamName })
-      setTeamName('')
-      await reload()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to add team')
-    } finally {
-      setBusy(false)
-    }
-  }
 
   const onKickTeam = async (teamId: string) => {
     if (!tournamentId) return
@@ -135,22 +117,15 @@ export default function TournamentManagementPage() {
       <section className="admin-card admin-grid">
         <h2>Team List ({teams.length}/{tournament.maxTeams})</h2>
         {canManageTeams ? (
-          <form onSubmit={onAddTeam} className="admin-form-row">
-            <input
-              className="admin-input"
-              value={teamName}
-              onChange={(e) => setTeamName(e.target.value)}
-              placeholder="Team name"
-              required
-            />
-            <button className="admin-button primary" type="submit" disabled={busy}>
-              Add Team
-            </button>
-          </form>
+          <p className="admin-muted">
+            Players join the tournament by creating teams from their dashboard.
+            Each team manager invites their teammates. As an admin you can kick
+            a team before the tournament starts.
+          </p>
         ) : null}
 
         {teams.length === 0 ? (
-          <p>No teams added yet.</p>
+          <p>No teams have joined yet.</p>
         ) : (
           <div className="admin-list">
             {teams.map((team) => (
@@ -224,21 +199,59 @@ export default function TournamentManagementPage() {
             {matches
               .slice()
               .sort((a, b) => a.sequence - b.sequence)
-              .map((match) => (
-                <Link
-                  className="admin-match-card"
-                  key={match.id}
-                  to={`/admin/tournaments/${tournament.id}/matches/${match.id}/score`}
-                >
-                  <div className="admin-match-top">
-                    <b>{stageLabel(match.stage)}</b>
-                    <span>Match #{match.sequence}</span>
+              .map((match) => {
+                const both = match.home.kind === 'team' && match.away.kind === 'team'
+                const completed = match.status === 'COMPLETED'
+                return (
+                  <div className="admin-match-card" key={match.id}>
+                    <div className="admin-match-top">
+                      <b>{stageLabel(match.stage)}</b>
+                      <span>Match #{match.sequence}</span>
+                    </div>
+                    <p>
+                      {match.home.label} vs {match.away.label}
+                    </p>
+                    {match.result ? (
+                      <p className="admin-soft">
+                        {match.result.summary ?? match.result.winnerLabel}
+                      </p>
+                    ) : null}
+                    <div className="admin-form-row" style={{ marginTop: 8 }}>
+                      {!completed && both ? (
+                        <Link
+                          className="admin-button primary"
+                          to={`/admin/tournaments/${tournament.id}/matches/${match.id}/score`}
+                        >
+                          Score match
+                        </Link>
+                      ) : null}
+                      <Link
+                        className="admin-button"
+                        to={`/tournaments/${tournament.id}/matches/${match.id}`}
+                      >
+                        View match
+                      </Link>
+                      <span
+                        className={`status-badge ${
+                          completed
+                            ? 'completed'
+                            : match.status === 'IN_PROGRESS'
+                            ? 'live-now'
+                            : 'upcoming'
+                        }`}
+                      >
+                        {completed
+                          ? 'Completed'
+                          : match.status === 'IN_PROGRESS'
+                          ? 'Live'
+                          : both
+                          ? 'Ready'
+                          : 'Awaiting teams'}
+                      </span>
+                    </div>
                   </div>
-                  <p>
-                    {match.home.label} vs {match.away.label}
-                  </p>
-                </Link>
-              ))}
+                )
+              })}
           </div>
         )}
       </section>

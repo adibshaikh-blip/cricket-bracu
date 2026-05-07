@@ -28,6 +28,8 @@ export type TournamentCreateInput = {
   numberOfGroups: number
   maxTeams: number
   tournamentType: TournamentTypeCode
+  /** Number of overs each innings of every match in this tournament will be played for. */
+  oversPerMatch: number
 }
 
 export type TournamentRecord = TournamentCreateInput & {
@@ -72,5 +74,21 @@ export type MatchRecord = {
   home: MatchParticipantRef
   away: MatchParticipantRef
   scheduledAt?: number
+  /** Set when match is finalised. Persisted on the tournament tree for quick listing. */
+  result?: MatchResult
+  /** Optional pointer to the live scoring record (kept for cross-referencing). */
+  liveMatchId?: string
+}
+
+export type MatchResult = {
+  winnerTeamId: string | null // null for tie or discarded
+  winnerLabel: string
+  margin: 'runs' | 'wickets' | 'tie' | 'discarded'
+  marginValue: number
+  innings1Summary?: { teamId: string; runs: number; wickets: number; oversText: string }
+  innings2Summary?: { teamId: string; runs: number; wickets: number; oversText: string }
+  manOfTheMatchUid?: string
+  manOfTheMatchName?: string
+  finalisedAt: number
 }
 
