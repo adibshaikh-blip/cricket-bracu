@@ -9,6 +9,8 @@ import {
   type PlayerRankingRow,
   type RankingCategoryId,
 } from '../../controllers/rankings/playerRankingController'
+import { getPanelMembers, type ClubMemberView } from '../../controllers/club/clubController'
+import { designationLabel } from '../../models/club/ClubMember'
 import type { MatchRecord, TournamentRecord } from '../../models/tournament/Tournament'
 
 type LiveMatchView = {
@@ -68,19 +70,22 @@ export default function HomePage() {
   const [upcoming, setUpcoming] = useState<TournamentRecord[]>([])
   const [rankingRows, setRankingRows] = useState<PlayerRankingRow[]>([])
   const [rankingCategory, setRankingCategory] = useState<RankingCategoryId>('runs')
+  const [panelMembers, setPanelMembers] = useState<ClubMemberView[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     let activeFlag = true
     ;(async () => {
-      const [buckets, rows] = await Promise.all([
+      const [buckets, rows, panel] = await Promise.all([
         getPublicTournamentBuckets(),
         getPlayerRankingRows(),
+        getPanelMembers(),
       ])
       if (!activeFlag) return
       setActive(buckets.active)
       setUpcoming(buckets.upcoming)
       setRankingRows(rows)
+      setPanelMembers(panel)
       setLoading(false)
     })()
     return () => {
@@ -131,7 +136,51 @@ export default function HomePage() {
         </div>
       </section>
 
-      <div className="home-split">
+      <div className="home-split three-col">
+        <aside className="home-aside-left">
+          <div className="ranking-panel panel-aside">
+            <div className="ranking-panel-head">
+              <h3 className="ranking-panel-title">Club Panel</h3>
+              <Link to="/club" className="ranking-panel-link">
+                See all
+              </Link>
+            </div>
+
+            {loading ? (
+              <p className="admin-muted">Loading panel...</p>
+            ) : panelMembers.length === 0 ? (
+              <div className="empty-state" style={{ padding: 16 }}>
+                <p className="empty-title">No panel yet</p>
+              </div>
+            ) : (
+              <div className="panel-aside-list">
+                {panelMembers.map((m) => {
+                  const initial = (m.playerName || '?').slice(0, 1).toUpperCase()
+                  return (
+                    <Link
+                      key={m.uid}
+                      to={`/players/${m.uid}`}
+                      className="panel-aside-row"
+                    >
+                      <div className="member-avatar small">{initial}</div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div className="member-name">{m.playerName}</div>
+                        <div className="member-role">
+                          {designationLabel(m.designation)}
+                        </div>
+                      </div>
+                    </Link>
+                  )
+                })}
+              </div>
+            )}
+
+            <Link to="/club" className="admin-button outline-brand ranking-cta">
+              View All Members
+            </Link>
+          </div>
+        </aside>
+
         <div className="home-main">
           <section className="admin-grid">
             <div className="section-head">

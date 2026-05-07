@@ -74,6 +74,36 @@ export default function AdminDashboardPage() {
           </p>
         </Link>
 
+        <Link
+          to="/admin/complaints"
+          className="admin-card admin-create-card"
+          style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}
+        >
+          <div className="section-head">
+            <h2>Complaint Resolver</h2>
+            <span className="status-badge ongoing">Resolve</span>
+          </div>
+          <p className="admin-muted">
+            Review player complaints, set status, write resolution notes, and
+            close cases.
+          </p>
+        </Link>
+
+        <Link
+          to="/admin/club"
+          className="admin-card admin-create-card"
+          style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}
+        >
+          <div className="section-head">
+            <h2>Club Management</h2>
+            <span className="status-badge ongoing">Members</span>
+          </div>
+          <p className="admin-muted">
+            Add players to the club, assign designations and departments,
+            promote panel members, or remove members.
+          </p>
+        </Link>
+
         <div className="admin-card">
           <h2>Created Tournaments</h2>
           {myTournaments.length === 0 ? (

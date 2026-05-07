@@ -153,6 +153,21 @@ export default function PlayerDashboardPage() {
             Sunday to Thursday. One booking per player per day.
           </p>
         </Link>
+
+        <Link
+          to="/player/complaints"
+          className="admin-card admin-create-card"
+          style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}
+        >
+          <div className="section-head">
+            <h2>Submit a Complaint</h2>
+            <span className="status-badge ongoing">Voice your concern</span>
+          </div>
+          <p className="admin-muted">
+            Report an issue privately or anonymously. Track the status and any
+            admin response on this page.
+          </p>
+        </Link>
       </section>
 
       <section className="admin-card admin-grid">

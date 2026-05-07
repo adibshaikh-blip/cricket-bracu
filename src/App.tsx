@@ -18,6 +18,10 @@ import TournamentInfoPage from './mvc/views/public/TournamentInfoPage'
 import PlayerRankingsPage from './mvc/views/public/PlayerRankingsPage'
 import FieldBookingPage from './mvc/views/player/FieldBookingPage'
 import FieldBookingsAdminPage from './mvc/views/admin/FieldBookingsAdminPage'
+import ComplaintsPage from './mvc/views/player/ComplaintsPage'
+import ComplaintResolverPage from './mvc/views/admin/ComplaintResolverPage'
+import ClubMembersPage from './mvc/views/public/ClubMembersPage'
+import ClubManagementPage from './mvc/views/admin/ClubManagementPage'
 
 function AppLayout() {
   return (
@@ -45,6 +49,7 @@ export default function App() {
         <Route path="/tournaments" element={<PublicTournamentPage />} />
         <Route path="/tournaments/:tournamentId" element={<TournamentInfoPage />} />
         <Route path="/rankings" element={<PlayerRankingsPage />} />
+        <Route path="/club" element={<ClubMembersPage />} />
         <Route path="/dashboard" element={<DashboardRedirect />} />
 
         <Route path="/admin/login" element={<AdminLoginPage />} />
@@ -96,6 +101,30 @@ export default function App() {
           element={
             <RequireRole requiredRole="admin">
               <FieldBookingsAdminPage />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/player/complaints"
+          element={
+            <RequireRole requiredRole="player">
+              <ComplaintsPage />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/admin/complaints"
+          element={
+            <RequireRole requiredRole="admin">
+              <ComplaintResolverPage />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/admin/club"
+          element={
+            <RequireRole requiredRole="admin">
+              <ClubManagementPage />
             </RequireRole>
           }
         />
