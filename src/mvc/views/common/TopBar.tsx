@@ -24,6 +24,9 @@ export default function TopBar() {
           <NavLink to="/tournaments" className="topbar-link">
             Tournaments
           </NavLink>
+          <NavLink to="/rankings" className="topbar-link">
+            Rankings
+          </NavLink>
 
           {!user ? (
             <>

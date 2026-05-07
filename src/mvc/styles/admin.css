@@ -984,7 +984,540 @@
   margin-top: 4px;
 }
 
+/* ---------- Home split (main + side panel) ---------- */
+.home-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 22px;
+  margin-top: 18px;
+  align-items: start;
+}
+
+.home-main {
+  min-width: 0;
+  display: grid;
+  gap: 22px;
+}
+
+.home-aside {
+  position: sticky;
+  top: 80px;
+  align-self: start;
+}
+
+/* ---------- Ranking side panel ---------- */
+.ranking-panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  padding: 18px;
+}
+
+.ranking-panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+}
+
+.ranking-panel-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-h);
+}
+
+.ranking-panel-link {
+  color: var(--brand);
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.ranking-panel-link:hover {
+  color: var(--brand-dark);
+  text-decoration: underline;
+}
+
+.ranking-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.ranking-tab {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-h);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+
+.ranking-tab:hover {
+  border-color: var(--border-strong);
+}
+
+.ranking-tab.active {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #fff;
+}
+
+.ranking-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.ranking-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 6px;
+  border-radius: 8px;
+  transition: background 120ms ease;
+}
+
+.ranking-row:hover {
+  background: var(--surface-soft);
+}
+
+.ranking-pos {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 0.85rem;
+  background: var(--surface-muted);
+  color: var(--text);
+}
+
+.ranking-pos.pos-1 {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: #fff;
+}
+
+.ranking-pos.pos-2 {
+  background: linear-gradient(135deg, #cbd5e1, #94a3b8);
+  color: #fff;
+}
+
+.ranking-pos.pos-3 {
+  background: linear-gradient(135deg, #fb923c, #c2410c);
+  color: #fff;
+}
+
+.ranking-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ranking-name {
+  font-weight: 700;
+  color: var(--text-h);
+  text-decoration: none;
+  font-size: 0.92rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ranking-name:hover {
+  color: var(--brand);
+}
+
+.ranking-sub {
+  font-size: 0.76rem;
+  color: var(--text-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ranking-value {
+  flex-shrink: 0;
+  font-weight: 800;
+  color: var(--brand);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.95rem;
+}
+
+.ranking-cta {
+  width: 100%;
+  justify-content: center;
+  margin-top: 14px;
+}
+
+/* ---------- Vertical filter list (rankings page sidebar) ---------- */
+.filter-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filter-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: var(--text-h);
+  font-weight: 500;
+  cursor: pointer;
+  font-size: 0.92rem;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.filter-option:hover {
+  background: var(--surface-soft);
+}
+
+.filter-option .filter-radio {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--border-strong);
+  background: var(--surface);
+  position: relative;
+  transition: border-color 120ms ease;
+}
+
+.filter-option:hover .filter-radio {
+  border-color: var(--brand);
+}
+
+.filter-option.active {
+  background: var(--brand-bg);
+  border-color: var(--brand-border);
+  color: var(--brand-dark);
+  font-weight: 700;
+}
+
+.filter-option.active .filter-radio {
+  border-color: var(--brand);
+}
+
+.filter-option.active .filter-radio::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  background: var(--brand);
+}
+
+.filter-label {
+  flex: 1;
+}
+
+/* ---------- Podium (top 3 cards) ---------- */
+.podium {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.podium-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 18px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.podium-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.podium-card.rank-1 {
+  border-color: #f59e0b;
+  background: linear-gradient(180deg, #fffbeb 0%, #fff 60%);
+}
+
+.podium-card.rank-2 {
+  border-color: #cbd5e1;
+  background: linear-gradient(180deg, #f8fafc 0%, #fff 60%);
+}
+
+.podium-card.rank-3 {
+  border-color: #fb923c;
+  background: linear-gradient(180deg, #fff7ed 0%, #fff 60%);
+}
+
+.podium-rank {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--text-soft);
+  letter-spacing: 0.05em;
+}
+
+.podium-avatar {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: var(--brand);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  box-shadow: 0 4px 8px rgba(209, 32, 40, 0.25);
+}
+
+.podium-card.rank-1 .podium-avatar {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  box-shadow: 0 4px 8px rgba(245, 158, 11, 0.35);
+}
+
+.podium-card.rank-2 .podium-avatar {
+  background: linear-gradient(135deg, #cbd5e1, #94a3b8);
+  box-shadow: 0 4px 8px rgba(148, 163, 184, 0.35);
+}
+
+.podium-card.rank-3 .podium-avatar {
+  background: linear-gradient(135deg, #fb923c, #c2410c);
+  box-shadow: 0 4px 8px rgba(194, 65, 12, 0.3);
+}
+
+.podium-name {
+  font-weight: 800;
+  color: var(--text-h);
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.podium-metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.podium-metric-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--brand);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.podium-metric-label {
+  font-size: 0.7rem;
+  color: var(--text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 4px;
+}
+
+/* ---------- Field booking ---------- */
+.day-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.day-tab {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text-h);
+  padding: 10px 14px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 76px;
+  font: inherit;
+  transition: border-color 140ms ease, transform 140ms ease,
+    box-shadow 140ms ease, background 140ms ease;
+}
+
+.day-tab:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.day-tab.active {
+  border-color: var(--brand);
+  background: var(--brand);
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(209, 32, 40, 0.25);
+}
+
+.day-tab-weekday {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-soft);
+}
+
+.day-tab.active .day-tab-weekday {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.day-tab-day {
+  font-size: 1.4rem;
+  font-weight: 800;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.day-tab-month {
+  font-size: 0.78rem;
+  color: var(--text);
+  margin-top: 2px;
+}
+
+.day-tab.active .day-tab-month {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.day-tab-marker {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  color: var(--brand);
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.day-tab.active .day-tab-marker {
+  color: #fff;
+}
+
+.slot-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.slot-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
+}
+
+.slot-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.slot-card.booked {
+  background: var(--surface-soft);
+}
+
+.slot-card.is-mine {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--brand-bg);
+}
+
+.slot-card.is-past {
+  opacity: 0.7;
+}
+
+.slot-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.slot-card-label {
+  font-weight: 800;
+  color: var(--text-h);
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+}
+
+.slot-card-time {
+  font-size: 0.88rem;
+  color: var(--text);
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.slot-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.slot-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.9rem;
+}
+
+.slot-meta-label {
+  font-size: 0.7rem;
+  color: var(--text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+}
+
+.slot-card-foot .admin-button {
+  width: 100%;
+  justify-content: center;
+}
+
 /* ---------- Responsive ---------- */
+@media (max-width: 1000px) {
+  .home-split {
+    grid-template-columns: 1fr;
+  }
+  .home-aside {
+    position: static;
+  }
+}
+
 @media (max-width: 900px) {
   .with-sidebar {
     grid-template-columns: 1fr;
@@ -999,7 +1532,8 @@
   .admin-meta-row,
   .kpi-grid,
   .match-grid,
-  .tournament-grid {
+  .tournament-grid,
+  .slot-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1024,5 +1558,9 @@
   .stat-table thead th,
   .stat-table tbody td {
     padding: 9px 10px;
+  }
+
+  .podium {
+    grid-template-columns: 1fr;
   }
 }

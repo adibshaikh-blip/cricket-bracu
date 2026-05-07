@@ -7,6 +7,8 @@ export type BattingStats = {
   fours: number
   sixes: number
   highestScore: number
+  fifties: number
+  hundreds: number
 }
 
 export type BowlingStats = {
@@ -17,6 +19,7 @@ export type BowlingStats = {
   maidens: number
   bestFigures: string
   economy: number
+  dotBalls: number
 }
 
 export type TournamentParticipation = {
@@ -43,6 +46,8 @@ export const defaultPlayerData: PlayerDataRecord = {
     fours: 0,
     sixes: 0,
     highestScore: 0,
+    fifties: 0,
+    hundreds: 0,
   },
   bowling: {
     matches: 0,
@@ -52,7 +57,7 @@ export const defaultPlayerData: PlayerDataRecord = {
     maidens: 0,
     bestFigures: '0/0',
     economy: 0,
+    dotBalls: 0,
   },
   tournamentHistory: [],
 }
-

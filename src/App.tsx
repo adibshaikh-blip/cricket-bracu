@@ -15,6 +15,9 @@ import TopBar from './mvc/views/common/TopBar'
 import HomePage from './mvc/views/public/HomePage'
 import PublicTournamentPage from './mvc/views/public/PublicTournamentPage'
 import TournamentInfoPage from './mvc/views/public/TournamentInfoPage'
+import PlayerRankingsPage from './mvc/views/public/PlayerRankingsPage'
+import FieldBookingPage from './mvc/views/player/FieldBookingPage'
+import FieldBookingsAdminPage from './mvc/views/admin/FieldBookingsAdminPage'
 
 function AppLayout() {
   return (
@@ -41,6 +44,7 @@ export default function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/tournaments" element={<PublicTournamentPage />} />
         <Route path="/tournaments/:tournamentId" element={<TournamentInfoPage />} />
+        <Route path="/rankings" element={<PlayerRankingsPage />} />
         <Route path="/dashboard" element={<DashboardRedirect />} />
 
         <Route path="/admin/login" element={<AdminLoginPage />} />
@@ -76,6 +80,22 @@ export default function App() {
           element={
             <RequireRole requiredRole="player">
               <PlayerDashboardPage />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/player/bookings"
+          element={
+            <RequireRole requiredRole="player">
+              <FieldBookingPage />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/admin/bookings"
+          element={
+            <RequireRole requiredRole="admin">
+              <FieldBookingsAdminPage />
             </RequireRole>
           }
         />

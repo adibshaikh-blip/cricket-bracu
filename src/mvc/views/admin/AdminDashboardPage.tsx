@@ -59,6 +59,21 @@ export default function AdminDashboardPage() {
           </p>
         </button>
 
+        <Link
+          to="/admin/bookings"
+          className="admin-card admin-create-card"
+          style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}
+        >
+          <div className="section-head">
+            <h2>Field Bookings</h2>
+            <span className="status-badge ongoing">Manage</span>
+          </div>
+          <p className="admin-muted">
+            View all reserved slots, see who booked them, and cancel any
+            booking if needed.
+          </p>
+        </Link>
+
         <div className="admin-card">
           <h2>Created Tournaments</h2>
           {myTournaments.length === 0 ? (

@@ -138,6 +138,22 @@ export default function PlayerDashboardPage() {
 
       {error ? <p className="admin-error">{error}</p> : null}
 
+      <section className="admin-grid">
+        <Link
+          to="/player/bookings"
+          className="admin-card admin-create-card"
+          style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}
+        >
+          <div className="section-head">
+            <h2>Book the Field</h2>
+            <span className="status-badge ongoing">New</span>
+          </div>
+          <p className="admin-muted">
+            Reserve a 2-hour cricket field slot. 3 slots available per day,
+            Sunday to Thursday. One booking per player per day.
+          </p>
+        </Link>
+      </section>
 
       <section className="admin-card admin-grid">
         <h2>Join Tournament by Creating Team</h2>
