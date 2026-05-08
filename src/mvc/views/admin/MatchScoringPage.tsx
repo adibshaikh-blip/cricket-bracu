@@ -1342,7 +1342,7 @@ function NewBatsmanModal({
   currentWickets: number
 }) {
   return (
-    <div className="admin-modal-backdrop" role="presentation" onClick={onCancel}>
+    <div className="admin-modal-backdrop modal-blocking" role="presentation">
       <div
         className="admin-modal"
         role="dialog"
@@ -1351,9 +1351,11 @@ function NewBatsmanModal({
       >
         <div className="admin-modal-header">
           <h2>New batsman</h2>
-          <button className="admin-close" type="button" onClick={onCancel}>
-            ×
-          </button>
+          {choices.length === 0 ? (
+            <button className="admin-close" type="button" onClick={onCancel}>
+              ×
+            </button>
+          ) : null}
         </div>
         <p className="admin-muted">
           {currentWickets}/{maxWickets} wickets fallen. Pick a player to come in.
@@ -1391,7 +1393,7 @@ function NewBowlerModal({
   onConfirm: (uid: string) => void
 }) {
   return (
-    <div className="admin-modal-backdrop" role="presentation" onClick={onCancel}>
+    <div className="admin-modal-backdrop modal-blocking" role="presentation">
       <div
         className="admin-modal"
         role="dialog"
@@ -1400,9 +1402,11 @@ function NewBowlerModal({
       >
         <div className="admin-modal-header">
           <h2>Next bowler</h2>
-          <button className="admin-close" type="button" onClick={onCancel}>
-            ×
-          </button>
+          {choices.length === 0 ? (
+            <button className="admin-close" type="button" onClick={onCancel}>
+              ×
+            </button>
+          ) : null}
         </div>
         <p className="admin-muted">
           Over completed. Choose the next bowler.
@@ -1410,18 +1414,24 @@ function NewBowlerModal({
             ? ' The previous over\'s bowler cannot bowl two consecutive overs.'
             : ''}
         </p>
-        <div className="player-pick-list">
-          {choices.map((p) => (
-            <button
-              key={p.uid}
-              className="player-pick-item"
-              type="button"
-              onClick={() => onConfirm(p.uid)}
-            >
-              <b>{p.name}</b>
-            </button>
-          ))}
-        </div>
+        {choices.length === 0 ? (
+          <p className="admin-error">
+            No eligible bowler — check team roster.
+          </p>
+        ) : (
+          <div className="player-pick-list">
+            {choices.map((p) => (
+              <button
+                key={p.uid}
+                className="player-pick-item"
+                type="button"
+                onClick={() => onConfirm(p.uid)}
+              >
+                <b>{p.name}</b>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )

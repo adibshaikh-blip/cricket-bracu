@@ -1,7 +1,15 @@
 import { getAllTournamentsFromDb, getTournamentByIdFromDb } from '../../models/firebase/tournamentRepository'
 import { getPlayerDataFromDb } from '../../models/firebase/playerDataRepository'
 import { getPlayerProfileFromDb } from '../../models/firebase/playerRepository'
-import type { MatchRecord, TeamRecord, TournamentRecord } from '../../models/tournament/Tournament'
+import type { TeamRecord, TournamentRecord } from '../../models/tournament/Tournament'
+import {
+  computeGroupPointsSections,
+  normalizeTeams,
+  type GroupPointsSection,
+  type PointsRow,
+} from './groupStandings'
+
+export type { PointsRow }
 
 export type TournamentGroupBuckets = {
   active: TournamentRecord[]
@@ -18,97 +26,14 @@ type PerformanceRow = {
   economyRate: number
 }
 
-type PointsRow = {
-  teamId: string
-  teamName: string
-  played: number
-  won: number
-  lost: number
-  tied: number
-  points: number
-}
-
 type TournamentInfoView = {
   tournament: TournamentRecord
-  pointsTable: PointsRow[]
+  /** One standings table per group (group stage only). Empty if tournament has not started. */
+  groupPointsTables: GroupPointsSection[]
+  /** Top N from each group advance (N × groups = knockout size). */
+  qualifiersPerGroup: number | null
   performanceTable: PerformanceRow[]
   bestPerformer: PerformanceRow | null
-}
-
-function normalizeTeams(tournament: TournamentRecord): TeamRecord[] {
-  const teams = tournament.teams
-  if (!teams) return []
-  if (Array.isArray(teams)) return teams.filter(Boolean)
-  return Object.values(teams as unknown as Record<string, TeamRecord>)
-}
-
-function normalizeMatches(tournament: TournamentRecord): MatchRecord[] {
-  const matches = tournament.matches
-  if (!matches) return []
-  if (Array.isArray(matches)) return matches.filter(Boolean)
-  return Object.values(matches as unknown as Record<string, MatchRecord>)
-}
-
-/**
- * ICC league standard:
- *   - Win: 2 points
- *   - Tie:  1 point each
- *   - Loss: 0 points
- *   - Discarded matches do not affect the table.
- */
-function computePointsTable(
-  teams: TeamRecord[],
-  tournament: TournamentRecord,
-): PointsRow[] {
-  const initial = new Map<string, PointsRow>(
-    teams.map((t) => [
-      t.id,
-      {
-        teamId: t.id,
-        teamName: t.teamName,
-        played: 0,
-        won: 0,
-        lost: 0,
-        tied: 0,
-        points: 0,
-      },
-    ]),
-  )
-
-  for (const match of normalizeMatches(tournament)) {
-    if (match.status !== 'COMPLETED' || !match.result) continue
-    if (match.result.margin === 'discarded') continue
-    if (match.home.kind !== 'team' || match.away.kind !== 'team') continue
-
-    const homeRow = initial.get(match.home.teamId)
-    const awayRow = initial.get(match.away.teamId)
-    if (!homeRow || !awayRow) continue
-
-    homeRow.played += 1
-    awayRow.played += 1
-
-    if (match.result.margin === 'tie' || match.result.winnerTeamId === null) {
-      homeRow.tied += 1
-      awayRow.tied += 1
-      homeRow.points += 1
-      awayRow.points += 1
-      continue
-    }
-
-    if (match.result.winnerTeamId === homeRow.teamId) {
-      homeRow.won += 1
-      homeRow.points += 2
-      awayRow.lost += 1
-    } else if (match.result.winnerTeamId === awayRow.teamId) {
-      awayRow.won += 1
-      awayRow.points += 2
-      homeRow.lost += 1
-    }
-  }
-
-  return Array.from(initial.values()).sort(
-    (a, b) => b.points - a.points || b.won - a.won || a.teamName.localeCompare(b.teamName),
-  )
 }
 
 async function computePerformanceTable(teams: TeamRecord[]): Promise<PerformanceRow[]> {
@@ -170,7 +95,12 @@ export async function getTournamentInfoView(
   if (!tournament) return null
 
   const teams = normalizeTeams(tournament)
-  const pointsTable = computePointsTable(teams, tournament)
+  const groupPointsTables = computeGroupPointsSections(tournament)
+  const knockoutSize = tournament.tournamentType === 1 ? 8 : 4
+  const ng = tournament.numberOfGroups || 1
+  const qpg = knockoutSize / ng
+  const qualifiersPerGroup = Number.isInteger(qpg) && qpg > 0 ? qpg : null
+
   const performanceTable = await computePerformanceTable(teams)
   const bestPerformer =
     tournament.status === 'COMPLETED'
@@ -179,7 +109,8 @@ export async function getTournamentInfoView(
 
   return {
     tournament,
-    pointsTable,
+    groupPointsTables,
+    qualifiersPerGroup,
     performanceTable,
     bestPerformer,
   }

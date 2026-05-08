@@ -72,7 +72,9 @@ export default function TournamentInfoPage() {
         <div className="kpi-grid">
           <div className="kpi-card brand">
             <p className="kpi-label">Teams</p>
-            <p className="kpi-value">{view.pointsTable.length}</p>
+            <p className="kpi-value">
+              {view.groupPointsTables.reduce((n, g) => n + g.rows.length, 0)}
+            </p>
           </div>
           <div className="kpi-card">
             <p className="kpi-label">Tracked Players</p>
@@ -115,41 +117,59 @@ export default function TournamentInfoPage() {
 
       <section className="admin-grid">
         <div className="section-head">
-          <h2 className="section-title">Points table</h2>
+          <h2 className="section-title">Group stage — points tables</h2>
         </div>
-        {view.pointsTable.length === 0 ? (
+        {view.qualifiersPerGroup != null ? (
+          <p className="admin-muted" style={{ marginBottom: 16 }}>
+            Teams play only within their group. Top {view.qualifiersPerGroup} from each
+            group advance to the knockout stage (quarter-finals or semi-finals by format).
+          </p>
+        ) : null}
+        {view.groupPointsTables.length === 0 ? (
           <div className="empty-state">
-            <p className="empty-title">No teams to show</p>
-            <p>Teams will appear here once they are added to the tournament.</p>
+            <p className="empty-title">No group tables yet</p>
+            <p>
+              After the tournament starts, each group will have its own points table from
+              round-robin matches within that group.
+            </p>
           </div>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table className="stat-table">
-              <thead>
-                <tr>
-                  <th className="rank">#</th>
-                  <th>Team</th>
-                  <th className="num">P</th>
-                  <th className="num">W</th>
-                  <th className="num">L</th>
-                  <th className="num">T</th>
-                  <th className="num">Pts</th>
-                </tr>
-              </thead>
-              <tbody>
-                {view.pointsTable.map((row, idx) => (
-                  <tr key={row.teamId}>
-                    <td className="rank">{idx + 1}</td>
-                    <td><b>{row.teamName}</b></td>
-                    <td className="num">{row.played}</td>
-                    <td className="num">{row.won}</td>
-                    <td className="num">{row.lost}</td>
-                    <td className="num">{row.tied}</td>
-                    <td className="num"><b>{row.points}</b></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+            {view.groupPointsTables.map((section) => (
+              <div key={section.groupId}>
+                <h3 className="section-title" style={{ fontSize: '1.05rem', marginBottom: 10 }}>
+                  {section.groupName}
+                </h3>
+                <div style={{ overflowX: 'auto' }}>
+                  <table className="stat-table">
+                    <thead>
+                      <tr>
+                        <th className="rank">#</th>
+                        <th>Team</th>
+                        <th className="num">P</th>
+                        <th className="num">W</th>
+                        <th className="num">L</th>
+                        <th className="num">T</th>
+                        <th className="num">Pts</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {section.rows.map((row, idx) => (
+                        <tr key={row.teamId}>
+                          <td className="rank">{idx + 1}</td>
+                          <td><b>{row.teamName}</b></td>
+                          <td className="num">{row.played}</td>
+                          <td className="num">{row.won}</td>
+                          <td className="num">{row.lost}</td>
+                          <td className="num">{row.tied}</td>
+                          <td className="num"><b>{row.points}</b></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </section>
@@ -250,7 +270,15 @@ function MatchesSection({ tournamentId }: { tournamentId: string }) {
           >
             <div className="match-card-top">
               <span>{stageLabel(m.stage)}</span>
-              <span className="status-badge {m.status === 'COMPLETED' ? 'completed' : 'upcoming'}">
+              <span
+                className={`status-badge ${
+                  m.status === 'COMPLETED'
+                    ? 'completed'
+                    : m.status === 'IN_PROGRESS'
+                      ? 'ongoing'
+                      : 'upcoming'
+                }`}
+              >
                 {m.status === 'COMPLETED'
                   ? 'Completed'
                   : m.status === 'IN_PROGRESS'

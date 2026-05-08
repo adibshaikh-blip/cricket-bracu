@@ -30,6 +30,7 @@
 
 import {
   ballsToOversText,
+  normalizeInningsState,
   type BallEvent,
   type BatsmanCard,
   type BowlerCard,
@@ -95,6 +96,7 @@ function ensureBowler(
   bowlerId: string,
   bowlingTeam: LiveMatchTeam,
 ): BowlerCard {
+  normalizeInningsState(innings)
   if (innings.bowlingCards[bowlerId]) return innings.bowlingCards[bowlerId]
   const order = Object.keys(innings.bowlingCards).length + 1
   const card = blankBowler(bowlerId, nameOf(bowlingTeam, bowlerId), order)
@@ -107,6 +109,7 @@ function activateBatsman(
   uid: string,
   battingTeam: LiveMatchTeam,
 ): BatsmanCard {
+  normalizeInningsState(innings)
   let card = innings.battingCards[uid]
   if (!card) {
     const order = Object.keys(innings.battingCards).length + 1
@@ -133,6 +136,7 @@ export function getYetToBatList(
   innings: InningsState,
   battingTeam: LiveMatchTeam,
 ): { uid: string; name: string }[] {
+  normalizeInningsState(innings)
   const onField = new Set(
     [innings.strikerId, innings.nonStrikerId].filter((x): x is string => Boolean(x)),
   )
@@ -285,6 +289,8 @@ export async function setOpeningBatsmen(params: {
     (params.inningsNumber === 1 ? m.innings1 : m.innings2) ??
     emptyInnings(params.inningsNumber, m.oversPerInnings, batting, bowling)
 
+  normalizeInningsState(innings)
+
   const striker = activateBatsman(innings, params.strikerId, batting)
   const nonStriker = activateBatsman(innings, params.nonStrikerId, batting)
   // Force "NOT_OUT" for both openers.
@@ -383,6 +389,8 @@ export async function recordBall(params: {
   const innings = inningsNumber === 1 ? m.innings1 : m.innings2
   if (!innings) throw new Error('Innings not initialised.')
   if (innings.closed) throw new Error('Innings already closed.')
+
+  normalizeInningsState(innings)
 
   if (!innings.strikerId || !innings.nonStrikerId || !innings.currentBowlerId) {
     throw new Error('Striker, non-striker and bowler must all be assigned.')
@@ -622,13 +630,10 @@ export async function recordBall(params: {
     // For run-out with odd runs completed, the surviving batsman ends up
     // at the dismissed batsman's end. The new batsman comes in at the
     // *other* end. Equivalent: swap "alive batsman" position.
-    if (innings.strikerId === null && innings.nonStrikerId !== null) {
+    if (!innings.strikerId && innings.nonStrikerId) {
       innings.strikerId = innings.nonStrikerId
       innings.nonStrikerId = null
-    } else if (
-      innings.nonStrikerId === null &&
-      innings.strikerId !== null
-    ) {
+    } else if (!innings.nonStrikerId && innings.strikerId) {
       innings.nonStrikerId = innings.strikerId
       innings.strikerId = null
     }
@@ -725,7 +730,7 @@ export async function recordBall(params: {
   let awaitingNewBatsman =
     wicketFell &&
     !inningsClosed &&
-    (innings.strikerId === null || innings.nonStrikerId === null)
+    (!innings.strikerId || !innings.nonStrikerId)
 
   if (overEndedInClosingInnings && !inningsClosed) {
     awaitingNewBowler = true
@@ -785,6 +790,8 @@ export async function selectNewBatsman(params: {
   if (!innings) throw new Error('Innings not initialised.')
   if (innings.closed) throw new Error('Innings already closed.')
 
+  normalizeInningsState(innings)
+
   const { batting } = teamsForInnings(m, inningsNumber)
   if (!batting.players.some((p) => p.uid === params.newBatsmanUid)) {
     throw new Error('New batsman must be from the batting team.')
@@ -801,9 +808,9 @@ export async function selectNewBatsman(params: {
 
   activateBatsman(innings, params.newBatsmanUid, batting)
 
-  if (innings.strikerId === null) {
+  if (!innings.strikerId) {
     innings.strikerId = params.newBatsmanUid
-  } else if (innings.nonStrikerId === null) {
+  } else if (!innings.nonStrikerId) {
     innings.nonStrikerId = params.newBatsmanUid
   } else {
     throw new Error('Both batsmen are already on the field.')
@@ -831,6 +838,8 @@ export async function selectNextBowler(params: {
   if (innings.currentBowlerId) {
     throw new Error('Current over still has an assigned bowler.')
   }
+
+  normalizeInningsState(innings)
 
   const { bowling } = teamsForInnings(m, inningsNumber)
   if (!bowling.players.some((p) => p.uid === params.bowlerId)) {

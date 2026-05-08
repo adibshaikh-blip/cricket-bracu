@@ -247,3 +247,47 @@ export function safeRunRate(runs: number, legalBalls: number): number {
   if (legalBalls <= 0) return 0
   return Number(((runs * 6) / legalBalls).toFixed(2))
 }
+
+/**
+ * Firebase Realtime Database does not persist empty objects (`{}`). After a
+ * read, `battingCards` / `bowlingCards` can be missing even though the type
+ * says they exist — any code that does `innings.battingCards[uid]` will then
+ * throw. Call this on any innings object loaded from RTDB.
+ */
+export function normalizeInningsState(innings: InningsState): void {
+  innings.battingCards = innings.battingCards ?? {}
+  innings.bowlingCards = innings.bowlingCards ?? {}
+  innings.events = Array.isArray(innings.events) ? innings.events : []
+  innings.fallOfWickets = Array.isArray(innings.fallOfWickets)
+    ? innings.fallOfWickets
+    : []
+  // Firebase RTDB drops null/undefined fields, so re-hydrate them as null
+  // so the rest of the engine can rely on `=== null` and falsy checks.
+  if (innings.strikerId === undefined) innings.strikerId = null
+  if (innings.nonStrikerId === undefined) innings.nonStrikerId = null
+  if (innings.currentBowlerId === undefined) innings.currentBowlerId = null
+  if (innings.previousBowlerId === undefined) innings.previousBowlerId = null
+  const e = innings.extras
+  if (!e || typeof e !== 'object') {
+    innings.extras = { wides: 0, noBalls: 0, byes: 0, legByes: 0, total: 0 }
+  } else {
+    innings.extras = {
+      wides: Number(e.wides) || 0,
+      noBalls: Number(e.noBalls) || 0,
+      byes: Number(e.byes) || 0,
+      legByes: Number(e.legByes) || 0,
+      total: 0,
+    }
+    innings.extras.total =
+      innings.extras.wides +
+      innings.extras.noBalls +
+      innings.extras.byes +
+      innings.extras.legByes
+  }
+}
+
+export function normalizeLiveMatchRecord(m: LiveMatchRecord): LiveMatchRecord {
+  if (m.innings1) normalizeInningsState(m.innings1)
+  if (m.innings2) normalizeInningsState(m.innings2)
+  return m
+}

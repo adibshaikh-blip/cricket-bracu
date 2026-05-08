@@ -32,21 +32,23 @@ import {
   type LiveMatchRecord,
 } from '../../models/scoring/Scoring'
 import type {
+  MatchParticipantRef,
   MatchRecord,
   MatchResult,
   TournamentRecord,
 } from '../../models/tournament/Tournament'
 import {
+  buildKnockoutSeedOrder,
+  computePointsTableForGroup,
+  normalizeGroups,
+  normalizeMatches as normalizeTournamentMatches,
+  normalizeTeams,
+  type PointsRow,
+} from '../tournaments/groupStandings'
+import {
   getLiveMatchFromDb,
   updateLiveMatchInDb,
 } from '../../models/firebase/liveMatchRepository'
-
-function normalizeMatches(t: TournamentRecord): MatchRecord[] {
-  const m = t.matches
-  if (!m) return []
-  if (Array.isArray(m)) return m.filter(Boolean)
-  return Object.values(m as unknown as Record<string, MatchRecord>)
-}
 
 function inningsToSummary(innings: InningsState): MatchResult['innings1Summary'] {
   return {
@@ -60,15 +62,11 @@ function inningsToSummary(innings: InningsState): MatchResult['innings1Summary']
 /* ---------- knockout advancement ---------- */
 
 /**
- * Tournament progression rules for knockout slots:
- *   - QF1..QF8 are filled by group winners/runners-up (we don't auto-fill these
- *     in this controller; they were created with named slots from
- *     tournamentManagementController and admins assign teams via a future UI).
- *     For now this advancer only handles "Winner X" → concrete team after a
- *     match decides who progresses.
- *
- *   - We look at the just-completed match's stage and sequence to determine
- *     which downstream slot should be replaced with the winner team.
+ * Knockout slots:
+ *   - When every group-stage match is completed, qualifier placeholders Q1…Qn are
+ *     filled from per-group standings (see maybeSeedKnockoutFromGroupStage).
+ *   - After each knockout match, "Winner QFn" / "Winner SFn" labels propagate to
+ *     the next round (advanceKnockoutSlots).
  */
 function advanceKnockoutSlots(
   matches: MatchRecord[],
@@ -121,6 +119,74 @@ function advanceKnockoutSlots(
     }
     return updated
   })
+}
+
+function isQualifierPlaceholder(ref: MatchParticipantRef): boolean {
+  return ref.kind === 'slot' && /^Q\d+$/.test(ref.label)
+}
+
+function applyQualifierSlotTeams(
+  matches: MatchRecord[],
+  seeds: PointsRow[],
+): MatchRecord[] {
+  const bySlot = new Map<string, { teamId: string; label: string }>()
+  seeds.forEach((row, i) => {
+    bySlot.set(`Q${i + 1}`, { teamId: row.teamId, label: row.teamName })
+  })
+
+  return matches.map((m) => {
+    let home = m.home
+    let away = m.away
+    if (home.kind === 'slot') {
+      const t = bySlot.get(home.label)
+      if (t) home = { kind: 'team', teamId: t.teamId, label: t.label }
+    }
+    if (away.kind === 'slot') {
+      const t = bySlot.get(away.label)
+      if (t) away = { kind: 'team', teamId: t.teamId, label: t.label }
+    }
+    if (home === m.home && away === m.away) return m
+    return { ...m, home, away }
+  })
+}
+
+/** After all group matches are done, map group standings to Q1…Qn seed slots. */
+function maybeSeedKnockoutFromGroupStage(
+  tournament: TournamentRecord,
+  matches: MatchRecord[],
+): MatchRecord[] {
+  const groups = normalizeGroups(tournament)
+  if (groups.length === 0) return matches
+
+  const qualifiedCount = tournament.tournamentType === 1 ? 8 : 4
+  const perGroup = qualifiedCount / groups.length
+  if (!Number.isInteger(perGroup) || perGroup < 1) return matches
+
+  const groupMatches = matches.filter((m) => m.stage === 'GROUP')
+  if (groupMatches.length === 0) return matches
+  if (groupMatches.some((m) => m.status !== 'COMPLETED')) return matches
+
+  const koStage = tournament.tournamentType === 1 ? 'QUARTER_FINAL' : 'SEMI_FINAL'
+  const openQualifierSlots = matches.some(
+    (m) =>
+      m.stage === koStage &&
+      (isQualifierPlaceholder(m.home) || isQualifierPlaceholder(m.away)),
+  )
+  if (!openQualifierSlots) return matches
+
+  const teams = normalizeTeams(tournament)
+  const rankedPerGroup = groups.map((g) =>
+    computePointsTableForGroup(g, teams, matches),
+  )
+
+  const seeds = buildKnockoutSeedOrder({
+    groups,
+    rankedRowsPerGroup: rankedPerGroup,
+    slotsCount: qualifiedCount,
+  })
+  if (seeds.length !== qualifiedCount) return matches
+
+  return applyQualifierSlotTeams(matches, seeds)
 }
 
 /* ---------- player stats ---------- */
@@ -285,7 +351,7 @@ export async function finalizeMatch(params: {
   const t = await getTournamentByIdFromDb(live.tournamentId)
   if (!t) throw new Error('Tournament not found.')
 
-  const matches = normalizeMatches(t)
+  const matches = normalizeTournamentMatches(t)
   const target = matches.find((m) => m.id === live.matchId)
   if (!target) throw new Error('Match record not found in tournament.')
 
@@ -340,6 +406,7 @@ export async function finalizeMatch(params: {
       result.winnerTeamId,
       result.winnerLabel,
     )
+    nextMatches = maybeSeedKnockoutFromGroupStage(t, nextMatches)
   }
 
   await setTournamentMatchesInDb({
